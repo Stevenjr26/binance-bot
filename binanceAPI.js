@@ -6,11 +6,13 @@ console.log(process.env.BINANCE_SECRET_KEY)
 const exchange = new binance({
   apiKey: process.env.BINANCE_API_KEY,
   secret: process.env.BINANCE_SECRET_KEY,
-   'proxies': {
-        'http': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
-        'https': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
-    }
+   // 'proxies': {
+   //      'http': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
+   //      'https': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
+   //  }
 });
+
+exchange.proxyUrl="http://e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293"
 
 const loadMarkets = async () => {
   await exchange.loadMarkets();
