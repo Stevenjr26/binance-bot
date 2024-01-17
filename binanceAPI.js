@@ -1,12 +1,14 @@
 const { binance } = require("ccxt");
 const BUDGET = require("./budget.js");
 
+console.log(process.env.BINANCE_SECRET_KEY)
+
 const exchange = new binance({
   apiKey: process.env.BINANCE_API_KEY,
   secret: process.env.BINANCE_SECRET_KEY,
    'proxies': {
-        'http': 'k5fbhsg3hthipf:7fpwk5psdq9dkibg115e15v8im@us-east-static-01.quotaguard.com:9293',
-        'https': 'k5fbhsg3hthipf:7fpwk5psdq9dkibg115e15v8im@us-east-static-01.quotaguard.com:9293',
+        'http': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
+        'https': 'e0pvhwhit9qxut:dx2zx8amr294lnkvfmwgxpl8l9rmyu@eu-west-static-06.quotaguard.com:9293',
     }
 });
 
