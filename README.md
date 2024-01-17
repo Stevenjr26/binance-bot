@@ -1,0 +1,5 @@
+## Command
+
+`npm run bot`
+
+---
