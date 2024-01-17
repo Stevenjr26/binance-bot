@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "bot": "node index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,6 +17,6 @@
     "input": "^1.0.1",
     "ora": "^8.0.1",
     "telegram": "^2.19.10",
-    "request": "^2.88.2",
+    "request": "^2.88.2"
   }
 }
