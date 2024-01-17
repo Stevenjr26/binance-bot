@@ -4,6 +4,10 @@ const BUDGET = require("./budget.js");
 const exchange = new binance({
   apiKey: process.env.BINANCE_API_KEY,
   secret: process.env.BINANCE_SECRET_KEY,
+   'proxies': {
+        'http': 'k5fbhsg3hthipf:7fpwk5psdq9dkibg115e15v8im@us-east-static-01.quotaguard.com:9293',
+        'https': 'k5fbhsg3hthipf:7fpwk5psdq9dkibg115e15v8im@us-east-static-01.quotaguard.com:9293',
+    }
 });
 
 const loadMarkets = async () => {
