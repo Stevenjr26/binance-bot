@@ -10,7 +10,7 @@ const events = require("events");
 const parseMessage = require("./parseMessage.js");
 
 const orderStatusEmitter = new events.EventEmitter();
-const telegramAPI = new TelegramAPI("MySession");
+const telegramAPI = new TelegramAPI();
 
 console.log(`pid`, process.pid, "\n");
 
@@ -64,11 +64,11 @@ async function consent() {
 async function runBot() {
   const chalk = await chalkModule;
   const ora = await oraPromise;
-  if (!(await consent())) {
-    console.log(chalk.green("i'm proud of you :)"));
-    return;
-  }
-  console.log(chalk.blueBright("well, I tried 🤷\n"));
+  // if (!(await consent())) {
+  //   console.log(chalk.green("i'm proud of you :)"));
+  //   return;
+  // }
+  // console.log(chalk.blueBright("well, I tried 🤷\n"));
   const processedMessages = (await fs.readFile("processed-messages.txt"))
     .toString("utf-8")
     .split("\n")
@@ -80,6 +80,7 @@ async function runBot() {
 
   const telegramSpinner = ora(chalk.blue("connecting to telegram...")).start();
   await telegramAPI.connect(telegramSpinner);
+
   telegramSpinner.succeed(chalk.green("connected to telegram..."));
   ora(chalk.green("starting bot...")).succeed();
   console.log("");
@@ -91,7 +92,8 @@ async function runBot() {
       return;
     }
     telegramAPI.getLatestMessage("-1001756092613").then(async (m) => {
-      if (m.length == 0 || processedMessages.indexOf(m[0].id + "")!=-1) return;
+      if (m.length == 0 || processedMessages.indexOf(m[0].id + "") != -1)
+        return;
       let message = m[0].message.replaceAll("\n", "");
       if (message.indexOf("Entry Targets:") == -1) return;
 

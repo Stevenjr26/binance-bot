@@ -1,7 +1,7 @@
 const { TelegramClient, Logger } = require("telegram");
 
 const input = require("input");
-const { StoreSession } = require("telegram/sessions");
+const { StoreSession, StringSession } = require("telegram/sessions");
 const { LogLevel } = require("telegram/extensions/Logger");
 
 const telegramAppCreds = {
@@ -11,7 +11,7 @@ const telegramAppCreds = {
 
 const createClient = (customer) =>
   new TelegramClient(
-    new StoreSession(customer),
+    new StringSession(process.env.TELEGRAM_SESSION_STRING),
     +telegramAppCreds.apiId,
     telegramAppCreds.apiHash,
     {
@@ -28,7 +28,7 @@ class TelegramAPI {
 
   async connect(spinner) {
     if (!(await this.isUserAuthorized())) {
-      spinner.stop();
+      spinner?.stop();
       await this.client.start({
         phoneNumber: async () => await input.text("Please enter your number: "),
         password: async () => await input.text("Please enter your password: "),
@@ -37,6 +37,7 @@ class TelegramAPI {
         onError: (err) => console.log(err),
       });
     }
+
     return this.client.connect();
   }
 
