@@ -11,7 +11,7 @@ const telegramAppCreds = {
 
 const createClient = (customer) =>
   new TelegramClient(
-    new StringSession(""),
+    new StringSession(process.env.TELEGRAM_SESSION_STRING),
     +telegramAppCreds.apiId,
     telegramAppCreds.apiHash,
     {
@@ -27,8 +27,8 @@ class TelegramAPI {
   }
 
   async connect(spinner) {
-  //  if (!(await this.isUserAuthorized())) {
-    //  spinner.stop();
+    if (!(await this.isUserAuthorized())) {
+      spinner?.stop();
       await this.client.start({
         phoneNumber: async () => await input.text("Please enter your number: "),
         password: async () => await input.text("Please enter your password: "),
@@ -36,7 +36,8 @@ class TelegramAPI {
           await input.text("Please enter the code you received: "),
         onError: (err) => console.log(err),
       });
-   // }
+    }
+
     return this.client.connect();
   }
 
@@ -55,13 +56,6 @@ class TelegramAPI {
     return this.client.getMessages(channelId, {
       limit: 1,
     });
-  }
-  async sendMessage(channelId, message){
-   return this.client.sendMessage({
-      channelId,
-    },{
-      message
-    })
   }
 }
 
