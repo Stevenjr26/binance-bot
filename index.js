@@ -83,7 +83,6 @@ async function runBot() {
 
   telegramSpinner.succeed(chalk.green("connected to telegram..."));
   ora(chalk.green("starting bot...")).succeed();
-  console.log("");
   const callsSpinner = ora(
     chalk.gray("listening to calls on telegram")
   ).start();
@@ -107,7 +106,7 @@ async function runBot() {
         }
 
         callsSpinner.succeed();
-        console.log("");
+        telegramAPI.sendMessage("-1002019185457",`Attempting new order for ${ticker} at ${entryTarget}`)
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
         botConfig.status = "STOPPED";
         await fs.appendFile("processed-messages.txt", m[0].id + "\n");

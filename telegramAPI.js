@@ -66,13 +66,9 @@ class TelegramAPI {
       new Api.messages.SendMessage({
         peer: channelId,
         message,
-        
       })
     );
-    console.log(result); // pri
-    return this.client.sendMessage({channelId}, {
-      message
-    });
+    return result
   }
 }
 
