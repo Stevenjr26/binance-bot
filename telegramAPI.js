@@ -1,4 +1,4 @@
-const { TelegramClient, Logger } = require("telegram");
+const { TelegramClient, Logger, Api } = require("telegram");
 
 const input = require("input");
 const { StoreSession, StringSession } = require("telegram/sessions");
@@ -60,6 +60,16 @@ class TelegramAPI {
   }
 
   async sendMessage(channelId, message) {
+    
+
+    const result = await this.client.invoke(
+      new Api.messages.SendMessage({
+        peer: channelId,
+        message,
+        
+      })
+    );
+    console.log(result); // pri
     return this.client.sendMessage({channelId}, {
       message
     });

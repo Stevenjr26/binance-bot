@@ -87,7 +87,7 @@ async function runBot() {
   const callsSpinner = ora(
     chalk.gray("listening to calls on telegram")
   ).start();
-  telegramAPI.sendMessage("-1002019185457","Bot Started")
+  telegramAPI.sendMessage("-1002019185457","Short call: "+ ticker)
   setInterval(() => {
     if (botConfig.status == "STOPPED") {
       return;
