@@ -10,7 +10,7 @@ const events = require("events");
 const parseMessage = require("./parseMessage.js");
 
 const orderStatusEmitter = new events.EventEmitter();
-const telegramAPI = new TelegramAPI("MySession");
+const telegramAPI = new TelegramAPI("");
 
 console.log(`pid`, process.pid, "\n");
 
@@ -64,25 +64,25 @@ async function consent() {
 async function runBot() {
   const chalk = await chalkModule;
   const ora = await oraPromise;
-  if (!(await consent())) {
-    console.log(chalk.green("i'm proud of you :)"));
-    return;
-  }
-  console.log(chalk.blueBright("well, I tried 🤷\n"));
+  // if (!(await consent())) {
+  //   console.log(chalk.green("i'm proud of you :)"));
+  //   return;
+  // }
+  // console.log(chalk.blueBright("well, I tried 🤷\n"));
   const processedMessages = (await fs.readFile("processed-messages.txt"))
     .toString("utf-8")
     .split("\n")
     .filter((s) => !!s?.trim());
 
-  const binanceSpinner = ora(chalk.yellow("connecting to binance...")).start();
-  await binanceAPI.loadMarkets();
-  binanceSpinner.succeed(chalk.green("connected to binance..."));
-
-  const telegramSpinner = ora(chalk.blue("connecting to telegram...")).start();
-  await telegramAPI.connect(telegramSpinner);
+  // const binanceSpinner = ora(chalk.yellow("connecting to binance...")).start();
+  // await binanceAPI.loadMarkets();
+  // binanceSpinner.succeed(chalk.green("connected to binance..."));
+  //const telegramSpinner = ora(chalk.blue("connecting to telegram...")).start();
+  await telegramAPI.connect();
+  console.log(await telegramAPI.getSession())
   telegramSpinner.succeed(chalk.green("connected to telegram..."));
   ora(chalk.green("starting bot...")).succeed();
-  console.log("");
+  await telegramAPI.sendMessage("-1002019185457","Bot starting...").catch(console.log)
   const callsSpinner = ora(
     chalk.gray("listening to calls on telegram")
   ).start();
@@ -98,9 +98,11 @@ async function runBot() {
       try {
         const { ticker, entryTarget, firstTakeProfitTarget, signalType } =
           parseMessage(message);
-        if (signalType != "Long") return;
+        if (signalType != "Long"){ 
+          telegramAPI.sendMessage("-1002019185457","Ignored short call")
+          return;
+        }
         callsSpinner.succeed();
-        console.log("");
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
         botConfig.status = "STOPPED";
         await fs.appendFile("processed-messages.txt", m[0].id + "\n");
@@ -111,7 +113,9 @@ async function runBot() {
       } catch (e) {
         if ("PARSE_ERROR" != e.message) {
           console.log(e);
+         
         }
+        telegramAPI.sendMessage("-1002019185457","Error",e.message)
       }
     });
   }, 20 * 1000);
