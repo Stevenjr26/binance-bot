@@ -87,6 +87,7 @@ async function runBot() {
   const callsSpinner = ora(
     chalk.gray("listening to calls on telegram")
   ).start();
+  telegramAPI.sendMessage("-1002019185457","Bot Started")
   setInterval(() => {
     if (botConfig.status == "STOPPED") {
       return;
@@ -100,7 +101,11 @@ async function runBot() {
       try {
         const { ticker, entryTarget, firstTakeProfitTarget, signalType } =
           parseMessage(message);
-        if (signalType != "Long") return;
+        if (signalType != "Long"){ 
+          telegramAPI.sendMessage("-1002019185457","Short call: "+ ticker)
+          return;
+        }
+
         callsSpinner.succeed();
         console.log("");
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
@@ -114,6 +119,7 @@ async function runBot() {
         if ("PARSE_ERROR" != e.message) {
           console.log(e);
         }
+        telegramAPI.sendMessage("-1002019185457","Error",e.message)
       }
     });
   }, 20 * 1000);

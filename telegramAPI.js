@@ -52,9 +52,16 @@ class TelegramAPI {
   async getSession() {
     return this.client.session.save();
   }
+
   async getLatestMessage(channelId) {
     return this.client.getMessages(channelId, {
       limit: 1,
+    });
+  }
+
+  async sendMessage(channelId, message) {
+    return this.client.sendMessage({channelId}, {
+      message
     });
   }
 }
