@@ -4,6 +4,7 @@ const input = require("input");
 const { StoreSession, StringSession } = require("telegram/sessions");
 const { LogLevel } = require("telegram/extensions/Logger");
 const fs = require("fs/promises");
+const parseMessage = require("./parseMessage.js");
 
 const telegramAppCreds = {
   apiId: process.env.TELEGRAM_API_ID,
