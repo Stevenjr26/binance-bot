@@ -1,3 +1,3 @@
-const BUDGET = 19;
+const BUDGET = process.env.BUDGET;
 
 module.exports = BUDGET;

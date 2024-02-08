@@ -3,6 +3,7 @@ const { TelegramClient, Logger, Api } = require("telegram");
 const input = require("input");
 const { StoreSession, StringSession } = require("telegram/sessions");
 const { LogLevel } = require("telegram/extensions/Logger");
+const fs = require("fs/promises");
 
 const telegramAppCreds = {
   apiId: process.env.TELEGRAM_API_ID,
@@ -24,6 +25,13 @@ class TelegramAPI {
   constructor(customer) {
     this.customer = customer;
     this.client = createClient(customer);
+  }
+
+  async getProcessedMessages(){
+    return (await fs.readFile("processed-messages.txt"))
+    .toString("utf-8")
+    .split("\n")
+    .filter((s) => !!s?.trim());
   }
 
   async connect(spinner) {
@@ -54,9 +62,24 @@ class TelegramAPI {
   }
 
   async getLatestMessage(channelId) {
-    return this.client.getMessages(channelId, {
-      limit: 1,
+    const messages = await this.client.getMessages(channelId, {
+      limit: 20,
     });
+
+    const processed  = (await this.getProcessedMessages()) ?? []
+    return messages.filter(m=>{
+      try{
+      const { ticker,  signalType } =
+          parseMessage(m);
+          if(processed.indexOf(m.id+"")!=-1) return false;
+          if(ticker.indexOf('1000')!=-1) return false;
+          if(signalType!="Long") return false;
+          return true;
+      }catch(e){
+        console.log(e)
+        return false;
+      }
+    })
   }
 
   async sendMessage(channelId, message) {

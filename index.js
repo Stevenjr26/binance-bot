@@ -91,7 +91,7 @@ async function runBot() {
     if (botConfig.status == "STOPPED") {
       return;
     }
-    telegramAPI.getLatestMessage("-1001756092613").then(async (m) => {
+    telegramAPI.getLatestMessage(process.env.TELEGRAM_CHANNEL_ID).then(async (m) => {
       if (m.length == 0 || processedMessages.indexOf(m[0].id + "") != -1)
         return;
       let message = m[0].message.replaceAll("\n", "");
