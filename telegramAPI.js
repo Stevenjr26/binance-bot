@@ -71,7 +71,7 @@ class TelegramAPI {
     return messages.filter(m=>{
       try{
       const { ticker,  signalType } =
-          parseMessage(m);
+          parseMessage(m.message);
           if(processed.indexOf(m.id+"")!=-1) return false;
           if(ticker.indexOf('1000')!=-1) return false;
           if(signalType!="Long") return false;
