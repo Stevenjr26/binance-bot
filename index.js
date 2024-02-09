@@ -91,7 +91,7 @@ async function runBot() {
     if (botConfig.status == "STOPPED") {
       return;
     }
-    telegramAPI.getLatestMessage(process.env.TELEGRAM_CHANNEL_ID).then(async (m) => {
+    telegramAPI.getLatestMessage(process.env.).then(async (m) => {
       if (m.length == 0 || processedMessages.indexOf(m[0].id + "") != -1)
         return;
       let message = m[0].message.replaceAll("\n", "");
@@ -120,7 +120,7 @@ async function runBot() {
         }
         telegramAPI.sendMessage("-1002019185457","Error",e.message)
       }
-    });
+    }).catch(console.log);
   }, 20 * 1000);
   // .then(process.exit);
 }
