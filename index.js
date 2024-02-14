@@ -55,12 +55,14 @@ orderStatusEmitter.on("NEW_ORDER", async (order) => {
 
 orderStatusEmitter.on("ORDER_FILLED", (order) => {
   console.log("\n🍿🍿🍿ORDER FILLED🍿🍿🍿\n", order, "\n");
+  telegramAPI.sendMessage("-1002019185457", "Attempting sell order " + order.symbol)
   binanceAPI
     .createSellOrder(order.symbol, order.executedQty, order.takeProfitTarget)
     .then(async (tp) => {
       console.log(`🎉 Take profit order created:`, tp);
       await removePlacedOrdersJson(order)
       botConfig.status = "RUNNING";
+      telegramAPI.sendMessage("-1002019185457", "😀 Profit taken at" + order.takeProfitTarget)
       //process.exit();
     })
     .catch((e) => {
@@ -172,7 +174,8 @@ runBot().catch((e) => {
 
 const executePlacedOrders = async () => {
   const placedOrders = JSON.parse(await fetchPlacedOrdersJson());
-  for (let order of placedOrders) {
+  for (let o in placedOrders) {
+    const order = placedOrders[o]
     try {
       if (order.status == "FILLED") {
         orderStatusEmitter.emit("ORDER_FILLED", order);
@@ -202,7 +205,7 @@ const executePlacedOrders = async () => {
   }
 }
 
-executePlacedOrders().then(console.log)
+executePlacedOrders().then(console.log).catch(console.log)
 
 // setInterval(async ()=>{
 //   for(let o of placedOrders){
