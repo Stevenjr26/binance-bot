@@ -1,5 +1,7 @@
 const fs = require("fs/promises");
-const fetchPlacedOrdersJson = async () => (await fs.readFile("placed-orders.json"))
-  .toString("utf-8")
+const fetchPlacedOrdersJson = async () => {
+    const str=(await fs.readFile("placed-orders.json")).toString("utf-8")
+    console.log(str,typeof str,str.toString())
+}
 
-  fetchPlacedOrdersJson().then(s=>JSON.parse(s)).then(console.log)
+  fetchPlacedOrdersJson().then(console.log)

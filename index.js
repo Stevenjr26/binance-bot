@@ -84,7 +84,7 @@ const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json
 
 const updatePlacedOrdersJson = async (order) => {
   const str = await fetchPlacedOrdersJson()
-  console.log(str)
+  console.log(str,typeof str,str.toString())
   const orders = JSON.parse(str);
   orders[order.orderId] = order;
   await writePlacedOrdersJson(orders);
