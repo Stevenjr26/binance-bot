@@ -17,30 +17,40 @@ console.log(`pid`, process.pid, "\n");
 const botConfig = { status: "RUNNING" };
 
 orderStatusEmitter.on("NEW_ORDER", async (order) => {
-  console.log("\n⚡️⚡️⚡️ORDER PLACED⚡️⚡️⚡️\n", order, "\n");
-  if (order.status == "FILLED") {
-    await updatePlacedOrdersJson(order)
-    orderStatusEmitter.emit("ORDER_FILLED", order);
-    return;
-  }
-  let id;
-  id = setInterval(async () => {
-    const fetchedOrder = await binanceAPI.fetchOrder(order);
-    console.log("Order status: ", fetchedOrder.status);
-    if (fetchedOrder.status == "FILLED") {
+  try {
+    console.log("\n⚡️⚡️⚡️ORDER PLACED⚡️⚡️⚡️\n", order, "\n");
+    if (order.status == "FILLED") {
+      console.log("Order filled")
       await updatePlacedOrdersJson(order)
       orderStatusEmitter.emit("ORDER_FILLED", order);
-      clearInterval(id);
       return;
     }
-    if (fetchedOrder.status == "CANCELED") {
-      console.log("Order cancelled:", order);
-      await removePlacedOrdersJson(fetchedOrder)
-      clearInterval(id);
-      botConfig.status = "RUNNING";
-      return;
+    let id;
+    id = setInterval(async () => {
+      try {
+        const fetchedOrder = await binanceAPI.fetchOrder(order);
+        console.log("Order status: ", fetchedOrder.status);
+        if (fetchedOrder.status == "FILLED") {
+          await updatePlacedOrdersJson(order)
+          orderStatusEmitter.emit("ORDER_FILLED", order);
+          clearInterval(id);
+          return;
+        }
+        if (fetchedOrder.status == "CANCELED") {
+          console.log("Order cancelled:", order);
+          await removePlacedOrdersJson(fetchedOrder)
+          clearInterval(id);
+          botConfig.status = "RUNNING";
+          return;
+        }
+      } catch (e) {
+        console.log(e)
+      }
     }
-  }, 30 * 1000);
+      , 30 * 1000);
+  } catch (e) {
+    console.log(e)
+  }
 });
 
 orderStatusEmitter.on("ORDER_FILLED", (order) => {
@@ -66,7 +76,7 @@ async function consent() {
   return input.confirm(`are you ready to ${chalk.red("LOSE MONEY?")} 🚀`);
 }
 
-const fetchPlacedOrdersJson = async() => (await fs.readFile("placed-orders.json"))
+const fetchPlacedOrdersJson = async () => (await fs.readFile("placed-orders.json"))
   .toString("utf-8")
 
 const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json.toString()))
@@ -181,7 +191,7 @@ const executePlacedOrders = async () => {
           await removePlacedOrdersJson(fetchedOrder)
           console.log("Order cancelled:", order);
           clearInterval(intervalId);
-       //   botConfig.status = "RUNNING";
+          //   botConfig.status = "RUNNING";
           return;
         }
 
