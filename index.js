@@ -80,11 +80,11 @@ async function consent() {
 
 const fetchPlacedOrdersJson = async () => (await fs.readFile("placed-orders.json")).toString("utf-8")
 
-const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json.toString()))
+const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", JSON.stringify(json)))
 
 const updatePlacedOrdersJson = async (order) => {
   const str = await fetchPlacedOrdersJson()
-  console.log(str,typeof str,str.toString())
+  console.log(str,typeof str,str.toString(),order)
   const orders = JSON.parse(str);
   orders[order.orderId] = order;
   await writePlacedOrdersJson(orders);
@@ -175,6 +175,7 @@ runBot().catch((e) => {
 
 const executePlacedOrders = async () => {
   const placedOrders = JSON.parse(await fetchPlacedOrdersJson());
+  console.log(placedOrders)
   for (let o in placedOrders) {
     const order = placedOrders[o]
     try {
@@ -231,4 +232,4 @@ executePlacedOrders().then(console.log).catch(console.log)
 //   }
 // },30*1000)
 
-process.on("SIGINT", () => process.exit(1));
+//process.on("SIGINT", () => process.exit(1));
