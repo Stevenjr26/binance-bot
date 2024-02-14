@@ -65,7 +65,7 @@ async function consent() {
   return input.confirm(`are you ready to ${chalk.red("LOSE MONEY?")} 🚀`);
 }
 
-const fetchPlacedOrdersJson = () => (fs.readFile("placed-orders.json"))
+const fetchPlacedOrdersJson = async() => (await fs.readFile("placed-orders.json"))
   .toString("utf-8")
 
 const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json.toString()))
@@ -142,9 +142,9 @@ async function runBot() {
           takeProfitTarget: firstTakeProfitTarget,
         });
       } catch (e) {
-        if ("PARSE_ERROR" != e.message) {
-          console.log(e);
-        }
+        // if ("PARSE_ERROR" != e.message) {
+        //   console.log(e);
+        // }
         telegramAPI.sendMessage("-1002019185457", "Error", e.message)
       }
     }).catch(console.log);
