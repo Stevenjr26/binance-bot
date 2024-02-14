@@ -78,13 +78,14 @@ async function consent() {
   return input.confirm(`are you ready to ${chalk.red("LOSE MONEY?")} 🚀`);
 }
 
-const fetchPlacedOrdersJson = async () => (await fs.readFile("placed-orders.json"))
-  .toString("utf-8")
+const fetchPlacedOrdersJson = async () => (await fs.readFile("placed-orders.json")).toString("utf-8")
 
 const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json.toString()))
 
 const updatePlacedOrdersJson = async (order) => {
-  const orders = JSON.parse(await fetchPlacedOrdersJson());
+  const str = await fetchPlacedOrdersJson()
+  console.log(str)
+  const orders = JSON.parse(str);
   orders[order.orderId] = order;
   await writePlacedOrdersJson(orders);
 }
