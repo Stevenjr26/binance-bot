@@ -50,7 +50,8 @@ orderStatusEmitter.on("ORDER_FILLED", (order) => {
     .then(async (tp) => {
       console.log(`🎉 Take profit order created:`, tp);
       await removePlacedOrdersJson(order)
-      process.exit();
+      botConfig.status = "RUNNING";
+      //process.exit();
     })
     .catch((e) => {
       console.log(e);
@@ -130,10 +131,10 @@ async function runBot() {
 
         callsSpinner.succeed();
         telegramAPI.sendMessage("-1002019185457", `Attempting new order for ${ticker} at ${entryTarget}`)
+        await fs.appendFile("processed-messages.txt", m[0].id + "\n");
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
         botConfig.status = "STOPPED";
-        await fs.appendFile("processed-messages.txt", m[0].id + "\n");
-       await updatePlacedOrdersJson({
+        await updatePlacedOrdersJson({
           ...order,
           takeProfitTarget: firstTakeProfitTarget,
         })
