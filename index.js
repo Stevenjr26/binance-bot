@@ -16,9 +16,10 @@ console.log(`pid`, process.pid, "\n");
 
 const botConfig = { status: "RUNNING" };
 
-orderStatusEmitter.on("NEW_ORDER", (order) => {
+orderStatusEmitter.on("NEW_ORDER", async (order) => {
   console.log("\n⚡️⚡️⚡️ORDER PLACED⚡️⚡️⚡️\n", order, "\n");
   if (order.status == "FILLED") {
+    await updatePlacedOrdersJson(order)
     orderStatusEmitter.emit("ORDER_FILLED", order);
     return;
   }
@@ -27,25 +28,28 @@ orderStatusEmitter.on("NEW_ORDER", (order) => {
     const fetchedOrder = await binanceAPI.fetchOrder(order);
     console.log("Order status: ", fetchedOrder.status);
     if (fetchedOrder.status == "FILLED") {
+      await updatePlacedOrdersJson(order)
       orderStatusEmitter.emit("ORDER_FILLED", order);
       clearInterval(id);
       return;
     }
     if (fetchedOrder.status == "CANCELED") {
       console.log("Order cancelled:", order);
+      await removePlacedOrdersJson(fetchedOrder)
       clearInterval(id);
       botConfig.status = "RUNNING";
       return;
     }
-  }, 20 * 1000);
+  }, 30 * 1000);
 });
 
 orderStatusEmitter.on("ORDER_FILLED", (order) => {
   console.log("\n🍿🍿🍿ORDER FILLED🍿🍿🍿\n", order, "\n");
   binanceAPI
     .createSellOrder(order.symbol, order.executedQty, order.takeProfitTarget)
-    .then((tp) => {
+    .then(async (tp) => {
       console.log(`🎉 Take profit order created:`, tp);
+      await removePlacedOrdersJson(order)
       process.exit();
     })
     .catch((e) => {
@@ -61,6 +65,24 @@ async function consent() {
   return input.confirm(`are you ready to ${chalk.red("LOSE MONEY?")} 🚀`);
 }
 
+const fetchPlacedOrdersJson = () => (fs.readFile("placed-orders.json"))
+  .toString("utf-8")
+
+const writePlacedOrdersJson = (json) => (fs.writeFile("placed-orders.json", json.toString()))
+
+const updatePlacedOrdersJson = async (order) => {
+  const orders = JSON.parse(await fetchPlacedOrdersJson());
+  orders[order.orderId] = order;
+  await writePlacedOrdersJson(orders);
+}
+
+const removePlacedOrdersJson = async ({ orderId }) => {
+  const json = JSON.parse(await fetchPlacedOrdersJson())
+  delete json[orderId]
+  await writePlacedOrdersJson(json)
+}
+
+
 async function runBot() {
   const chalk = await chalkModule;
   const ora = await oraPromise;
@@ -74,6 +96,7 @@ async function runBot() {
     .split("\n")
     .filter((s) => !!s?.trim());
 
+
   const binanceSpinner = ora(chalk.yellow("connecting to binance...")).start();
   await binanceAPI.loadMarkets();
   binanceSpinner.succeed(chalk.green("connected to binance..."));
@@ -86,7 +109,7 @@ async function runBot() {
   const callsSpinner = ora(
     chalk.gray("listening to calls on telegram")
   ).start();
-  telegramAPI.sendMessage("-1002019185457","BOT STARTED")
+  telegramAPI.sendMessage("-1002019185457", "BOT STARTED")
   setInterval(() => {
     if (botConfig.status == "STOPPED") {
       return;
@@ -100,16 +123,20 @@ async function runBot() {
       try {
         const { ticker, entryTarget, firstTakeProfitTarget, signalType } =
           parseMessage(message);
-        if (signalType != "Long"){ 
-          telegramAPI.sendMessage("-1002019185457","Short call: "+ ticker)
+        if (signalType != "Long") {
+          telegramAPI.sendMessage("-1002019185457", "Short call: " + ticker)
           return;
         }
 
         callsSpinner.succeed();
-        telegramAPI.sendMessage("-1002019185457",`Attempting new order for ${ticker} at ${entryTarget}`)
+        telegramAPI.sendMessage("-1002019185457", `Attempting new order for ${ticker} at ${entryTarget}`)
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
         botConfig.status = "STOPPED";
         await fs.appendFile("processed-messages.txt", m[0].id + "\n");
+       await updatePlacedOrdersJson({
+          ...order,
+          takeProfitTarget: firstTakeProfitTarget,
+        })
         orderStatusEmitter.emit("NEW_ORDER", {
           ...order,
           takeProfitTarget: firstTakeProfitTarget,
@@ -118,7 +145,7 @@ async function runBot() {
         if ("PARSE_ERROR" != e.message) {
           console.log(e);
         }
-        telegramAPI.sendMessage("-1002019185457","Error",e.message)
+        telegramAPI.sendMessage("-1002019185457", "Error", e.message)
       }
     }).catch(console.log);
   }, 20 * 1000);
@@ -129,5 +156,64 @@ runBot().catch((e) => {
   console.log(e);
   process.exit(1);
 });
+
+
+
+const executePlacedOrders = async () => {
+  const placedOrders = JSON.parse(await fetchPlacedOrdersJson());
+  for (let order of placedOrders) {
+    try {
+      if (order.status == "FILLED") {
+        orderStatusEmitter.emit("ORDER_FILLED", order);
+        continue;
+      }
+      // const {orderId,ticker,amount,price,status,placedAt}=order
+      let intervalId = setInterval(async () => {
+        const fetchedOrder = await binanceAPI.fetchOrder(order);
+        if (fetchedOrder.status == "FILLED") {
+          await updatePlacedOrdersJson(fetchedOrder)
+          orderStatusEmitter.emit("ORDER_FILLED", order);
+          clearInterval(intervalId);
+          return;
+        }
+        if (fetchedOrder.status == "CANCELED") {
+          await removePlacedOrdersJson(fetchedOrder)
+          console.log("Order cancelled:", order);
+          clearInterval(intervalId);
+       //   botConfig.status = "RUNNING";
+          return;
+        }
+
+      }, 60 * 1000);
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+
+executePlacedOrders().then(console.log)
+
+// setInterval(async ()=>{
+//   for(let o of placedOrders){
+//     const [ticker,amount,price,status]=o.split(",")
+//     let intervalId = setInterval(async () => {
+//       const fetchedOrder = await binanceAPI.fetchOrder(order);
+//       console.log("Order status: ", fetchedOrder.status);
+//       if (fetchedOrder.status == "FILLED") {
+//         await writePlacedOrdersJson(fetchedOrder)
+//         orderStatusEmitter.emit("ORDER_FILLED", order);
+//         clearInterval(intervalId);
+//         return;
+//       }
+//       if (fetchedOrder.status == "CANCELED") {
+//         console.log("Order cancelled:", order);
+//         await writePlacedOrdersJson(fetchedOrder)
+//         clearInterval(intervalId);
+//         botConfig.status = "RUNNING";
+//         return;
+//       }
+//     }, 20 * 1000);
+//   }
+// },30*1000)
 
 process.on("SIGINT", () => process.exit(1));
