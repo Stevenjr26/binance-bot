@@ -68,6 +68,7 @@ class TelegramAPI {
     });
 
     const processed  = (await this.getProcessedMessages()) ?? []
+    console.log("processed",processed)
     return messages.filter(m=>{
       try{
       const { ticker,  signalType } =
@@ -81,6 +82,7 @@ class TelegramAPI {
         return false;
       }
     })
+    
   }
 
   async sendMessage(channelId, message) {

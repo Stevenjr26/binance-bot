@@ -57,7 +57,7 @@ orderStatusEmitter.on("ORDER_FILLED", (order) => {
   console.log("\n🍿🍿🍿ORDER FILLED🍿🍿🍿\n", order, "\n");
   
   let quantity = order.executedQty;
-  quantity = order.executedQty - (order.fills?.reduce((f,t)=>t+f.commission,0) ?? 0)
+  quantity = order.executedQty - (order.fills?.reduce((t,f)=>t+(f.commission ?? 0),0) ?? 0)
   telegramAPI.sendMessage("-1002019185457", "Attempting sell order " + order.symbol+ " | Quantity: "+quantity)
   binanceAPI
     .createSellOrder(order.symbol, quantity, order.takeProfitTarget)
@@ -178,7 +178,7 @@ runBot().catch((e) => {
 
 const executePlacedOrders = async () => {
   const placedOrders = JSON.parse(await fetchPlacedOrdersJson());
-  console.log(placedOrders)
+  console.log("placedOrders",placedOrders)
   for (let o in placedOrders) {
     const order = placedOrders[o]
     try {
