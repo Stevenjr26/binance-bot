@@ -73,6 +73,7 @@ orderStatusEmitter.on("ORDER_FILLED", (order) => {
       console.log(
         "***ATTENTION REQUIRED***\nCancel existing buy order or create take profit order"
       );
+      botConfig.status = "RUNNING";
     });
 });
 
@@ -178,12 +179,17 @@ runBot().catch((e) => {
 
 const executePlacedOrders = async () => {
   const placedOrders = JSON.parse(await fetchPlacedOrdersJson());
-  console.log("placedOrders",placedOrders)
+  //console.log("placedOrders",placedOrders)
   for (let o in placedOrders) {
     const order = placedOrders[o]
     try {
       if (order.status == "FILLED") {
         orderStatusEmitter.emit("ORDER_FILLED", order);
+        continue;
+      }
+      if(Date.now()-(+order.transactTime)>24*60*60*1000){
+        await removePlacedOrdersJson(fetchedOrder)
+        console.log("Order in FILLED status for more than 24 hours :", order);
         continue;
       }
       // const {orderId,ticker,amount,price,status,placedAt}=order

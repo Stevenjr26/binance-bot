@@ -68,7 +68,7 @@ class TelegramAPI {
     });
 
     const processed  = (await this.getProcessedMessages()) ?? []
-    console.log("processed",processed)
+    //console.log("processed",processed)
     return messages.filter(m=>{
       try{
       const { ticker,  signalType } =

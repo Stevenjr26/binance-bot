@@ -1,7 +1,7 @@
 const { binance } = require("ccxt");
 const BUDGET = require("./budget.js");
 
-console.log(process.env.BINANCE_SECRET_KEY)
+//console.log(process.env.BINANCE_SECRET_KEY)
 
 const exchange = new binance({
   apiKey: process.env.BINANCE_API_KEY,
