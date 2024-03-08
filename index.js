@@ -30,7 +30,7 @@ orderStatusEmitter.on("NEW_ORDER", async (order) => {
       try {
         const fetchedOrder = await binanceAPI.fetchOrder(order);
         console.log("Order status: ", fetchedOrder.status);
-        if (fetchedOrder.status == "FILLED") {
+        if (fetchedOrder.status == "FILLED" && fetchedOrder.executedQty!=0) {
           await updatePlacedOrdersJson(order)
           orderStatusEmitter.emit("ORDER_FILLED", order);
           clearInterval(id);
