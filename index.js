@@ -188,7 +188,7 @@ const executePlacedOrders = async () => {
         continue;
       }
       if(Date.now()-(+order.transactTime)>24*60*60*1000){
-        await removePlacedOrdersJson(fetchedOrder)
+        await removePlacedOrdersJson(order)
         console.log("Order in FILLED status for more than 24 hours :", order);
         continue;
       }
