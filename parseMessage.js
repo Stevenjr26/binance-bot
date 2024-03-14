@@ -2,7 +2,7 @@ module.exports = function parseMessage(message) {
   // Regular expressions to match the required patterns
   const tickerPattern = /#(\w+\/\w+)/;
   const entryTargetPattern = /Entry Targets:\s*([\d.]+)/;
-  const takeProfitPattern = /Take-Profit Targets:\s*1\)([\d.]+)/;
+  const takeProfitPattern = /3\)([\d.]+)/ // /Take-Profit Targets:\s*1\)([\d.]+)/;
   const signalTypePattern = /Signal Type:\s*Regular\s*\((Short|Long)\)/;
 
   // Extracting the ticker
@@ -16,6 +16,7 @@ module.exports = function parseMessage(message) {
   // Extracting the first take profit target
   const takeProfitMatch = message.match(takeProfitPattern);
   const firstTakeProfitTarget = takeProfitMatch ? takeProfitMatch[1] : null;
+  
 
   // Extracting the signal type (Short/Long)
   const signalTypeMatch = message.match(signalTypePattern);
