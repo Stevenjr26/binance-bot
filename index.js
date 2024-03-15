@@ -30,7 +30,7 @@ orderStatusEmitter.on("NEW_ORDER", async (order) => {
       try {
         const fetchedOrder = await binanceAPI.fetchOrder(order);
         console.log("Order status: ", fetchedOrder.status);
-        if (fetchedOrder.status == "FILLED" && fetchedOrder.executedQty!=0) {
+        if (fetchedOrder.status == "FILLED" && fetchedOrder.executedQty!=0 && fetchedOrder.executedQty!='0') {
           await updatePlacedOrdersJson(order)
           orderStatusEmitter.emit("ORDER_FILLED", order);
           clearInterval(id);
@@ -148,8 +148,8 @@ async function runBot() {
 
         callsSpinner.succeed();
         telegramAPI.sendMessage("-1002019185457", `Attempting new order for ${ticker} at ${entryTarget}`)
-        await fs.appendFile("processed-messages.txt", m[0].id + "\n");
         const order = await binanceAPI.createBuyOrder(ticker, entryTarget);
+        await fs.appendFile("processed-messages.txt", m[0].id + "\n");
         botConfig.status = "STOPPED";
         await updatePlacedOrdersJson({
           ...order,
