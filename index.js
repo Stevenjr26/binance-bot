@@ -68,7 +68,7 @@ orderStatusEmitter.on("ORDER_FILLED", (order) => {
       console.log(`🎉 Take profit order created:`, tp);
       await removePlacedOrdersJson(order)
       botConfig.status = "RUNNING";
-      telegramAPI.sendMessage("-1002019185457", "😀 Profit taken at" + order.takeProfitTarget)
+      telegramAPI.sendMessage("-1002019185457", "😀 Sell order created at" + order.takeProfitTarget)
       //process.exit();
     })
     .catch((e) => {
