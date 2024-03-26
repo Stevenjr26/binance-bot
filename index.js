@@ -1,5 +1,6 @@
 const { config } = require("dotenv");
 config();
+require('log-timestamp')
 const fs = require("fs/promises");
 const oraPromise = import("ora").then(({ default: o }) => o);
 const chalkModule = require("./chalkModule.js");
@@ -56,8 +57,10 @@ orderStatusEmitter.on("NEW_ORDER", async (order) => {
 orderStatusEmitter.on("ORDER_FILLED", (order) => {
   console.log("\n🍿🍿🍿ORDER FILLED🍿🍿🍿\n", order, "\n");
   
-  let quantity = order.executedQty;
-  quantity = order.executedQty - (order.fills?.reduce((t,f)=>t+(f.commission ?? 0),0) ?? 0)
+  let quantity = +order.executedQty;
+  console.log("Sell quantity before deducting commission",quantity," Fills : "+(order.fills?.reduce((t,f)=>t+(+f.commission ?? 0),0) ?? 0))
+  quantity = +order.executedQty - (order.fills?.reduce((t,f)=>t+(+f.commission ?? 0),0) ?? 0)
+  console.log("Sell quantity after deducting commission",quantity)
   telegramAPI.sendMessage("-1002019185457", "Attempting sell order " + order.symbol+ " | Quantity: "+quantity)
   binanceAPI
     .createSellOrder(order.symbol, quantity, order.takeProfitTarget)
@@ -163,10 +166,11 @@ async function runBot() {
         // if ("PARSE_ERROR" != e.message) {
         //   console.log(e);
         // }
-        telegramAPI.sendMessage("-1002019185457", "Error", e.message)
+        console.log(e)
+        telegramAPI.sendMessage("-1002019185457", "Error:"+e.message)
       }
     }).catch(console.log);
-  }, 20 * 1000);
+  }, 60 * 1000);
   // .then(process.exit);
 }
 
