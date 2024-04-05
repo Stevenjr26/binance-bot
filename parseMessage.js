@@ -22,7 +22,7 @@ module.exports = function parseMessage(message) {
   const signalTypeMatch = message.match(signalTypePattern);
   const signalType = signalTypeMatch ? signalTypeMatch[1] : null;
 
-  console.log(ticker,entryTarget,firstTakeProfitTarget,signalType)
+  //console.log(ticker,entryTarget,firstTakeProfitTarget,signalType)
 
   if (
     ticker == null ||
